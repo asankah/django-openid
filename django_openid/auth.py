@@ -16,7 +16,6 @@ class AuthConsumer(consumer.SessionConsumer):
     Uses SessionConsumer rather than CookieConsumer because the auth system
     relies on sessions already.
     """
-    after_login_redirect_url = '/'
     
     associations_template = 'django_openid/associations.html'
     login_plus_password_template = 'django_openid/login_plus_password.html'
@@ -114,7 +113,7 @@ class AuthConsumer(consumer.SessionConsumer):
     def on_login_complete(self, request, user, openid=None):
         response = self.redirect_if_valid_next(request)
         if not response:
-            response = Redirect(self.after_login_redirect_url)
+            response = Redirect(self.redirect_after_login)
         return response
     
     def on_logged_in(self, request, openid, openid_response):
@@ -126,7 +125,7 @@ class AuthConsumer(consumer.SessionConsumer):
             if request.user.id in [u.id for u in matches]:
                 response = self.redirect_if_valid_next(request)
                 if not response:
-                    response = Redirect(self.after_login_redirect_url)
+                    response = Redirect(self.redirect_after_login)
                 return response
             else:
                 # Offer to associate this OpenID with their account

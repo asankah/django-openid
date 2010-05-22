@@ -12,7 +12,6 @@ from openid.consumer import consumer
 import urlparse
 
 class RegistrationConsumer(AuthConsumer):
-    already_signed_in_message = 'You are already signed in to this site'
     unknown_openid_message = \
         'That OpenID is not recognised. Would you like to create an account?'
     c_already_confirmed_message = 'Your account is already confirmed'
@@ -65,11 +64,7 @@ class RegistrationConsumer(AuthConsumer):
         return self.ChangePasswordForm
     
     def show_i_have_logged_you_in(self, request):
-        return self.show_message(
-            request, 'You are logged in',
-            'You already have an account for that OpenID. ' + 
-            'You are now logged in.'
-        )
+        return self.show_already_logged_in(request)
     
     def do_register_complete(self, request):
         
@@ -119,7 +114,7 @@ class RegistrationConsumer(AuthConsumer):
         # Show a registration / signup form, provided the user is not 
         # already logged in
         if not request.user.is_anonymous():
-            return self.show_already_signed_in(request)
+            return self.show_already_logged_in(request)
         
         # Spot incoming openid_url authentication requests
         if request.POST.get('openid_url', None):
@@ -174,7 +169,7 @@ class RegistrationConsumer(AuthConsumer):
                 request.path, '../logo/'
             )),
             'no_thanks': self.sign_next(request.path),
-            'action': request.path,
+            'action': urlparse.urljoin(request.path, '../register/'),
         })
     
     def confirm_email_step(self, request, user):
@@ -317,8 +312,3 @@ class RegistrationConsumer(AuthConsumer):
         # OpenID BUT it's an OpenID we have never seen before - so show 
         # them the index page but with an additional message
         return self.do_index(request, self.unknown_openid_message)
-    
-    def show_already_signed_in(self, request):
-        return self.show_message(
-            request, 'Already signed in', self.already_signed_in_message
-        )
